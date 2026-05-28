@@ -27,6 +27,9 @@
   --blue-light: #e6f1fb;
   --done-bg: #f0faf6;
   --done-border: #9FE1CB;
+  --danger: #c14048;
+  --danger-light: #fce8e8;
+  --danger-text: #791f1f;
   --radius: 14px;
   --radius-sm: 9px;
 }
@@ -70,6 +73,36 @@ body {
 .btn:hover { border-color: var(--text3); color: var(--text); }
 .btn:active { transform: scale(0.97); }
 
+.alert-banner {
+  background: var(--danger-light);
+  border: 1px solid rgba(193,64,72,0.3);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 1.5rem;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 15px;
+  color: var(--danger-text);
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+.alert-banner.show { display: flex; }
+.alert-banner-text { display: inline-flex; align-items: center; gap: 9px; }
+.alert-banner-link {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.alert-banner-link:hover { background: #a33037; }
+
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem; }
 .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 20px; }
 .stat-num { font-size: 32px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; line-height: 1.1; }
@@ -103,6 +136,7 @@ body {
 
 .task-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; transition: border-color 0.2s, background 0.2s; }
 .task-card.done { background: var(--done-bg); border-color: var(--done-border); }
+.task-card.overdue:not(.done) { border-color: rgba(193,64,72,0.5); box-shadow: inset 4px 0 0 var(--danger); }
 .task-card.subtask { margin-right: 28px; }
 
 .task-main { display: flex; align-items: center; gap: 14px; padding: 18px 20px; }
@@ -119,6 +153,10 @@ body {
 .owner-pill { font-size: 13px; padding: 3px 11px; border-radius: 99px; border: 1px solid; white-space: nowrap; font-weight: 500; }
 .dep-tag { font-size: 13px; color: var(--text3); display: inline-flex; align-items: center; gap: 5px; }
 .note-badge { font-size: 13px; color: var(--accent); display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+.meta-badge { font-size: 12px; padding: 3px 10px; border-radius: 99px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+.meta-badge.overdue { background: var(--danger-light); color: var(--danger-text); }
+.meta-badge.approaching { background: var(--amber-light); color: var(--amber); }
+.meta-badge.inprogress { background: var(--blue-light); color: var(--blue); }
 
 .last-edit { font-size: 12px; color: var(--text3); margin-top: 6px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.01em; }
 .last-edit:empty { display: none; }
@@ -130,6 +168,110 @@ body {
 .task-body.open { display: block; }
 .divider { height: 1px; background: var(--border); margin-bottom: 16px; }
 .task-card.done .divider { background: var(--done-border); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text3);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab-btn .tab-badge {
+  font-size: 11px; background: var(--danger-light); color: var(--danger-text);
+  padding: 1px 7px; border-radius: 99px; font-weight: 600;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Schedule panel */
+.schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.schedule-row:last-child { margin-bottom: 0; }
+.schedule-label {
+  font-size: 13px;
+  color: var(--text3);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  min-width: 90px;
+}
+.schedule-value {
+  font-size: 14px;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+}
+.schedule-btn {
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  cursor: pointer;
+  color: var(--text2);
+  font-family: inherit;
+  font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.schedule-btn:hover { border-color: var(--text3); color: var(--text); }
+.schedule-btn.active { background: var(--accent-light); color: var(--accent-text); border-color: rgba(29,158,117,0.4); }
+.schedule-btn.danger { color: var(--text3); }
+.schedule-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+.date-input {
+  font-size: 14px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: inherit;
+  color: var(--text);
+  direction: ltr;
+  cursor: pointer;
+}
+.date-input:focus { border-color: var(--accent); outline: none; }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid;
+}
+.status-pill.notstarted { background: var(--surface2); color: var(--text2); border-color: var(--border); }
+.status-pill.planned { background: var(--blue-light); color: var(--blue); border-color: rgba(24,95,165,0.3); }
+.status-pill.inprogress { background: var(--blue-light); color: var(--blue); border-color: rgba(24,95,165,0.3); }
+.status-pill.approaching { background: var(--amber-light); color: var(--amber); border-color: rgba(186,117,23,0.3); }
+.status-pill.overdue { background: var(--danger-light); color: var(--danger-text); border-color: rgba(193,64,72,0.3); }
+.status-pill.done { background: var(--accent-light); color: var(--accent-text); border-color: rgba(29,158,117,0.3); }
+
+.schedule-hint { font-size: 12px; color: var(--text3); margin-top: -6px; margin-bottom: 14px; }
 
 .steps-title { font-size: 13px; color: var(--text3); letter-spacing: 0.05em; margin-bottom: 12px; font-weight: 600; }
 .step-row { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 10px; }
@@ -172,6 +314,14 @@ body {
       </button>
       <button class="btn" onclick="resetAll()">איפוס</button>
     </div>
+  </div>
+
+  <div class="alert-banner" id="alert-banner">
+    <div class="alert-banner-text">
+      <span style="font-size:18px">⚠️</span>
+      <span id="alert-banner-text"></span>
+    </div>
+    <button class="alert-banner-link" onclick="jumpToFirstOverdue()">הצג משימה</button>
   </div>
 
   <div class="stats-row">
@@ -220,6 +370,7 @@ const PUT_DEBOUNCE_MS = 800;
 
 const LOCAL_FALLBACK_KEY = 'lachma_wp_v3_local';
 const cloudEnabled = !!(JSONBIN_BIN_ID && JSONBIN_ACCESS_KEY);
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const phases = [
   {
@@ -259,10 +410,14 @@ const phases = [
   }
 ];
 
-// state shape: { tasks: { t1: { done, steps, note, lastEditedAt }, ... }, lastUpdate: number }
+// state shape:
+//   { tasks: { t1: { done, completedAt, startedAt, targetAt, steps, note, lastEditedAt }, ... }, lastUpdate: number }
 let state = { tasks: {}, lastUpdate: 0 };
 let localDirty = false;
 let pendingPutTimer = null;
+
+// UI state (not synced) — preserved across re-renders
+const uiState = { expanded: new Set(), activeTab: {} };
 
 function getTask(id) {
   return state.tasks[id] || { done: false, steps: {}, note: '' };
@@ -391,14 +546,104 @@ function markEdit(taskId) {
   state.tasks[taskId] = s;
 }
 
-function toggleTask(id) {
-  const s = getTask(id); s.done = !s.done; state.tasks[id] = s;
-  markEdit(id); queuePut();
-  const el = document.getElementById('card-' + id);
-  if (el) el.classList.toggle('done', s.done);
-  updateLastEditDisplay(id);
-  updateStats();
+// ============== schedule helpers ==============
+function targetTimestamp(targetAtStr) {
+  if (!targetAtStr) return null;
+  // end-of-day local time on the target date
+  const d = new Date(targetAtStr + 'T23:59:59');
+  return isNaN(d.getTime()) ? null : d.getTime();
 }
+
+function daysLabel(n, mode) {
+  n = Math.abs(n);
+  if (mode === 'past') {
+    if (n <= 1) return 'יום';
+    if (n === 2) return 'יומיים';
+    return n + ' ימים';
+  } else {
+    if (n <= 0) return 'היום';
+    if (n === 1) return 'מחר';
+    if (n === 2) return 'מחרתיים';
+    return 'בעוד ' + n + ' ימים';
+  }
+}
+
+function getTaskStatus(task) {
+  if (task.done) return { kind: 'done', label: 'הושלם' };
+  const targetTs = targetTimestamp(task.targetAt);
+  const now = Date.now();
+  if (targetTs && targetTs < now) {
+    const days = Math.ceil((now - targetTs) / DAY_MS);
+    return { kind: 'overdue', label: 'באיחור של ' + daysLabel(days, 'past') };
+  }
+  if (targetTs) {
+    const days = Math.ceil((targetTs - now) / DAY_MS);
+    if (days <= 2) return { kind: 'approaching', label: daysLabel(days, 'future') };
+    if (task.startedAt) return { kind: 'inprogress', label: 'בעבודה · ' + daysLabel(days, 'future') };
+    return { kind: 'planned', label: 'מתוכנן · ' + daysLabel(days, 'future') };
+  }
+  if (task.startedAt) return { kind: 'inprogress', label: 'בעבודה' };
+  return { kind: 'notstarted', label: 'טרם התחיל' };
+}
+
+function formatDateHe(input) {
+  let d;
+  if (typeof input === 'number') d = new Date(input);
+  else if (typeof input === 'string') d = new Date(input + 'T00:00:00');
+  else return '';
+  if (isNaN(d.getTime())) return '';
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return dd + '.' + mm + '.' + d.getFullYear();
+}
+
+function countOverdue() {
+  let n = 0;
+  phases.forEach(ph => ph.tasks.forEach(t => {
+    const s = getTask(t.id);
+    if (!s.done && getTaskStatus(s).kind === 'overdue') n++;
+  }));
+  return n;
+}
+
+function updateAlertBanner() {
+  const banner = document.getElementById('alert-banner');
+  const text = document.getElementById('alert-banner-text');
+  const n = countOverdue();
+  if (n > 0) {
+    text.textContent = n === 1 ? 'יש משימה אחת באיחור' : 'יש ' + n + ' משימות באיחור';
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+function jumpToFirstOverdue() {
+  for (const ph of phases) {
+    for (const t of ph.tasks) {
+      const s = getTask(t.id);
+      if (!s.done && getTaskStatus(s).kind === 'overdue') {
+        uiState.expanded.add(t.id);
+        uiState.activeTab[t.id] = 'schedule';
+        renderBoard();
+        const el = document.getElementById('card-' + t.id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+  }
+}
+
+// ============== actions ==============
+function toggleTask(id) {
+  const s = getTask(id); s.done = !s.done;
+  if (s.done) s.completedAt = Date.now(); else s.completedAt = null;
+  state.tasks[id] = s;
+  markEdit(id); queuePut();
+  // Full re-render so card style, status pill, badges, and banner all stay in sync
+  renderBoard();
+}
+
 function toggleStep(taskId, idx) {
   const s = getTask(taskId); if (!s.steps) s.steps = {};
   s.steps[idx] = !s.steps[idx]; state.tasks[taskId] = s;
@@ -409,6 +654,7 @@ function toggleStep(taskId, idx) {
   if (t) t.classList.toggle('checked', s.steps[idx]);
   updateLastEditDisplay(taskId);
 }
+
 function saveNote(taskId) {
   const s = getTask(taskId); const el = document.getElementById('note-' + taskId);
   if (el) {
@@ -421,10 +667,46 @@ function saveNote(taskId) {
     updateLastEditDisplay(taskId);
   }
 }
-function toggleExpand(id) {
-  const b = document.getElementById('body-' + id), e = document.getElementById('expand-' + id);
-  if (!b) return; const open = b.classList.toggle('open'); if (e) e.classList.toggle('open', open);
+
+function toggleStarted(taskId) {
+  const s = getTask(taskId);
+  s.startedAt = s.startedAt ? null : Date.now();
+  state.tasks[taskId] = s;
+  markEdit(taskId); queuePut();
+  renderBoard();
 }
+
+function setTarget(taskId, dateStr) {
+  const s = getTask(taskId);
+  s.targetAt = dateStr || null;
+  state.tasks[taskId] = s;
+  markEdit(taskId); queuePut();
+  renderBoard();
+}
+
+function clearTarget(taskId) {
+  setTarget(taskId, '');
+}
+
+function toggleExpand(id) {
+  if (uiState.expanded.has(id)) uiState.expanded.delete(id);
+  else uiState.expanded.add(id);
+  const b = document.getElementById('body-' + id);
+  const e = document.getElementById('expand-' + id);
+  if (b) {
+    b.classList.toggle('open', uiState.expanded.has(id));
+    if (e) e.classList.toggle('open', uiState.expanded.has(id));
+  }
+}
+
+function activateTab(taskId, tabName) {
+  uiState.activeTab[taskId] = tabName;
+  const card = document.getElementById('card-' + taskId);
+  if (!card) return;
+  card.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+  card.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tabName));
+}
+
 function toggleSummary() {
   const b = document.getElementById('summary-body'), e = document.getElementById('summary-expand');
   const open = b.classList.toggle('open'); e.classList.toggle('open', open);
@@ -462,7 +744,10 @@ function exportStatus() {
     out += '【 ' + ph.label + ' 】\n';
     ph.tasks.forEach(t => {
       const s = getTask(t.id);
-      out += (s.done ? '✅' : '⬜') + ' ' + t.title + ' (' + t.owner + ')\n';
+      const st = getTaskStatus(s);
+      out += (s.done ? '✅' : '⬜') + ' ' + t.title + ' (' + t.owner + ') · ' + st.label + '\n';
+      if (s.startedAt) out += '   ▶ התחיל: ' + formatDateHe(s.startedAt) + '\n';
+      if (s.targetAt) out += '   🎯 יעד: ' + formatDateHe(s.targetAt) + '\n';
       t.steps.forEach((step, i) => { out += '   ' + (s.steps && s.steps[i] ? '✓' : '○') + ' ' + step + '\n'; });
       if (s.note && s.note.trim()) out += '   📝 הערה: ' + s.note.trim() + '\n';
       out += '\n';
@@ -470,6 +755,49 @@ function exportStatus() {
   });
   navigator.clipboard.writeText(out).then(() => alert('הסטטוס הועתק ללוח! אפשר להדביק ב-WhatsApp.'))
     .catch(() => { prompt('העתק את הסטטוס:', out); });
+}
+
+function buildSchedulePanel(taskId, s) {
+  const status = getTaskStatus(s);
+  let html = '<div class="schedule-row">'
+    + '<span class="schedule-label">סטטוס:</span>'
+    + '<span class="status-pill ' + status.kind + '">' + status.label + '</span>'
+    + '</div>';
+
+  // Started row
+  html += '<div class="schedule-row">'
+    + '<span class="schedule-label">התחלת ביצוע:</span>';
+  if (s.startedAt) {
+    html += '<span class="schedule-value">' + formatDateHe(s.startedAt) + '</span>'
+      + '<button class="schedule-btn danger" onclick="toggleStarted(\'' + taskId + '\')">בטל סימון</button>';
+  } else {
+    html += '<button class="schedule-btn" onclick="toggleStarted(\'' + taskId + '\')">▶ סמן שהתחלת</button>';
+  }
+  html += '</div>';
+
+  // Target date row
+  html += '<div class="schedule-row">'
+    + '<label class="schedule-label" for="target-' + taskId + '">יעד השלמה:</label>'
+    + '<input type="date" class="date-input" id="target-' + taskId + '" value="' + (s.targetAt || '') + '" onchange="setTarget(\'' + taskId + '\', this.value)">';
+  if (s.targetAt) {
+    html += '<button class="schedule-btn danger" onclick="clearTarget(\'' + taskId + '\')">נקה</button>';
+  }
+  html += '</div>';
+
+  // Completed row
+  if (s.done && s.completedAt) {
+    html += '<div class="schedule-row">'
+      + '<span class="schedule-label">הושלם ב:</span>'
+      + '<span class="schedule-value">' + formatDateHe(s.completedAt) + '</span>'
+      + '</div>';
+  }
+
+  // Hint
+  if (!s.startedAt && !s.targetAt && !s.done) {
+    html += '<div class="schedule-hint">בעל המשימה — כשתתחיל, סמן ״התחלת ביצוע״ ובחר תאריך יעד. הצוות יראה את הסטטוס בזמן אמת.</div>';
+  }
+
+  return html;
 }
 
 function renderBoard() {
@@ -481,9 +809,18 @@ function renderBoard() {
     phDiv.innerHTML = '<div class="phase-label">' + ph.label + '</div>';
     ph.tasks.forEach(task => {
       const s = getTask(task.id);
+      const status = getTaskStatus(s);
       const card = document.createElement('div');
-      card.className = 'task-card' + (s.done ? ' done' : '') + (task.subtask ? ' subtask' : '');
+      const classes = ['task-card'];
+      if (s.done) classes.push('done');
+      if (status.kind === 'overdue') classes.push('overdue');
+      if (task.subtask) classes.push('subtask');
+      card.className = classes.join(' ');
       card.id = 'card-' + task.id;
+
+      const isExpanded = uiState.expanded.has(task.id);
+      const activeTab = uiState.activeTab[task.id] || 'steps';
+
       const stepsHtml = task.steps.map((step, i) => {
         const ck = s.steps && s.steps[i];
         return '<div class="step-row">'
@@ -491,7 +828,21 @@ function renderBoard() {
           + '<svg width="12" height="10" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
           + '<span class="step-text ' + (ck?'checked':'') + '" data-steptext="' + task.id + '-' + i + '">' + step + '</span></div>';
       }).join('');
+
       const hasNote = s.note && s.note.trim();
+
+      // Meta badges for status
+      let statusBadge = '';
+      if (!s.done && status.kind === 'overdue') {
+        statusBadge = '<span class="meta-badge overdue">🔴 ' + status.label + '</span>';
+      } else if (!s.done && status.kind === 'approaching') {
+        statusBadge = '<span class="meta-badge approaching">⚠️ ' + status.label + '</span>';
+      } else if (!s.done && status.kind === 'inprogress') {
+        statusBadge = '<span class="meta-badge inprogress">בעבודה</span>';
+      }
+
+      const schedulePanel = buildSchedulePanel(task.id, s);
+
       card.innerHTML =
         '<div class="task-main">'
         + '<button class="check-btn" onclick="toggleTask(\'' + task.id + '\')" aria-label="סמן בוצע">'
@@ -501,30 +852,48 @@ function renderBoard() {
         + '<div class="task-meta">'
         + '<span class="owner-pill" style="background:' + task.ownerColor.bg + ';color:' + task.ownerColor.text + ';border-color:' + task.ownerColor.border + '">' + task.owner + '</span>'
         + (task.dep ? '<span class="dep-tag"><svg width="13" height="13" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1"/><path d="M5.5 3v2.5L7 7" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>' + task.dep + '</span>' : '')
+        + statusBadge
         + '<span class="note-badge" id="notebadge-' + task.id + '" style="display:' + (hasNote?'inline-flex':'none') + '"><svg width="13" height="13" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v6l-2 2H2V2z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>הערה</span>'
         + '</div>'
         + '<div class="last-edit" id="lastedit-' + task.id + '">' + lastEditInner(s) + '</div>'
         + '</div>'
-        + '<button class="expand-btn" id="expand-' + task.id + '" onclick="toggleExpand(\'' + task.id + '\')" aria-label="הרחב"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+        + '<button class="expand-btn ' + (isExpanded ? 'open' : '') + '" id="expand-' + task.id + '" onclick="toggleExpand(\'' + task.id + '\')" aria-label="הרחב"><svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
         + '</div>'
-        + '<div class="task-body" id="body-' + task.id + '">'
+
+        + '<div class="task-body ' + (isExpanded ? 'open' : '') + '" id="body-' + task.id + '">'
         + '<div class="divider"></div>'
-        + '<div class="steps-title">שלבי ביצוע</div>'
-        + stepsHtml
-        + '<div class="note-area"><div class="note-label">הערות</div>'
-        + '<textarea class="note-input" id="note-' + task.id + '" placeholder="הוסף הערה..." oninput="saveNote(\'' + task.id + '\')">' + (s.note || '') + '</textarea>'
-        + '<div class="note-saved" id="saved-' + task.id + '">נשמר ✓</div></div>'
+
+        + '<div class="tabs">'
+        + '<button class="tab-btn ' + (activeTab === 'steps' ? 'active' : '') + '" data-tab="steps" onclick="activateTab(\'' + task.id + '\',\'steps\')">שלבי ביצוע</button>'
+        + '<button class="tab-btn ' + (activeTab === 'schedule' ? 'active' : '') + '" data-tab="schedule" onclick="activateTab(\'' + task.id + '\',\'schedule\')">לוח זמנים'
+          + (status.kind === 'overdue' && !s.done ? ' <span class="tab-badge">!</span>' : '')
+          + '</button>'
+        + '</div>'
+
+        + '<div class="tab-panel ' + (activeTab === 'steps' ? 'active' : '') + '" data-panel="steps">'
+          + '<div class="steps-title">שלבי ביצוע</div>'
+          + stepsHtml
+          + '<div class="note-area"><div class="note-label">הערות</div>'
+          + '<textarea class="note-input" id="note-' + task.id + '" placeholder="הוסף הערה..." oninput="saveNote(\'' + task.id + '\')">' + (s.note || '') + '</textarea>'
+          + '<div class="note-saved" id="saved-' + task.id + '">נשמר ✓</div></div>'
+        + '</div>'
+
+        + '<div class="tab-panel ' + (activeTab === 'schedule' ? 'active' : '') + '" data-panel="schedule">'
+          + schedulePanel
+        + '</div>'
+
         + '</div>';
       phDiv.appendChild(card);
     });
     board.appendChild(phDiv);
   });
   updateStats();
+  updateAlertBanner();
 }
 
 function resetAll() {
   const msg = cloudEnabled
-    ? 'לאפס את כל הסימונים וההערות עבור כל הצוות? פעולה זו תמחק את הנתונים גם אצל ליז ושרון.'
+    ? 'לאפס את כל הסימונים, ההערות והתאריכים עבור כל הצוות? פעולה זו תמחק את הנתונים גם אצל ליז ושרון.'
     : 'לאפס את כל הסימונים וההערות?';
   if (!confirm(msg)) return;
   state = { tasks: {}, lastUpdate: Date.now() };
@@ -537,9 +906,14 @@ initialLoad();
 setInterval(pollCloud, POLL_INTERVAL_MS);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pollCloud(); });
 
+// Refresh time-based labels every 30s without re-rendering
 setInterval(() => {
   Object.keys(state.tasks || {}).forEach(taskId => updateLastEditDisplay(taskId));
+  // Days-remaining and overdue state can shift across midnight — do a full re-render hourly
 }, 30000);
+
+// Re-render every 10 minutes so status pills and overdue banner stay fresh even with no edits
+setInterval(() => { if (!document.hidden) renderBoard(); }, 10 * 60 * 1000);
 </script>
 </body>
 </html>
