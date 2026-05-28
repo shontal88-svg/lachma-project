@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פרויקט WhatsApp — לחמא | ניהול משימות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: #e2e0d8;
+  --text: #1a1917;
+  --text2: #6b6960;
+  --text3: #a09e96;
+  --accent: #1D9E75;
+  --accent-light: #e1f5ee;
+  --accent-text: #085041;
+  --purple: #534AB7;
+  --purple-light: #eeedfe;
+  --amber: #BA7517;
+  --amber-light: #faeeda;
+  --blue: #185FA5;
+  --blue-light: #e6f1fb;
+  --done-bg: #f0faf6;
+  --done-border: #9FE1CB;
+  --radius: 12px;
+  --radius-sm: 7px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141412;
+    --surface: #1e1d1a;
+    --surface2: #252420;
+    --border: #2e2d28;
+    --text: #f0efe9;
+    --text2: #9e9c94;
+    --text3: #5a5850;
+    --accent-light: #04342C;
+    --accent-text: #9FE1CB;
+    --purple-light: #26215C;
+    --purple: #AFA9EC;
+    --amber-light: #412402;
+    --amber: #FAC775;
+    --blue-light: #042C53;
+    --blue: #85B7EB;
+    --done-bg: #04342C;
+    --done-border: #0F6E56;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'IBM Plex Sans Hebrew', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.app { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+.top-bar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; gap: 12px; flex-wrap: wrap; }
+.project-name { font-size: 22px; font-weight: 700; }
+.project-name span { color: var(--accent); }
+.project-sub { font-size: 12px; color: var(--text3); margin-top: 3px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em; }
+.top-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.sync-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 6px 10px; font-size: 12px;
+  color: var(--text2); transition: color 0.2s;
+}
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); transition: background 0.2s; flex-shrink: 0; }
+.sync-status.synced .sync-dot { background: var(--accent); }
+.sync-status.syncing .sync-dot { background: var(--amber); animation: sync-pulse 1s ease-in-out infinite; }
+.sync-status.offline .sync-dot { background: #c94a4a; }
+.sync-status.local .sync-dot { background: var(--text3); }
+@keyframes sync-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.user-select {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 6px 12px; font-size: 13px;
+}
+.user-select label { color: var(--text3); font-size: 12px; }
+.user-select select {
+  border: none; background: transparent; color: var(--text);
+  font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; outline: none;
+}
+
+.btn {
+  font-size: 12px; background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 7px 13px; cursor: pointer;
+  font-family: inherit; color: var(--text2); transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { border-color: var(--text3); color: var(--text); }
+.btn:active { transform: scale(0.97); }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+.stat { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; }
+.stat-num { font-size: 24px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+.stat-label { font-size: 11px; color: var(--text3); letter-spacing: 0.04em; margin-top: 2px; }
+.stat.done .stat-num { color: var(--accent); }
+.stat.pending .stat-num { color: var(--amber); }
+
+.progress-wrap { margin-bottom: 2rem; }
+.progress-label { font-size: 12px; color: var(--text3); margin-bottom: 7px; display: flex; justify-content: space-between; }
+.progress-track { height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+
+.summary-section { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 2rem; overflow: hidden; }
+.summary-head { padding: 13px 18px; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; }
+.summary-head:hover { background: var(--surface2); }
+.summary-body { padding: 0 18px 18px; display: none; font-size: 13px; color: var(--text2); }
+.summary-body.open { display: block; }
+.summary-body p { margin-bottom: 10px; }
+.summary-body strong { color: var(--text); font-weight: 600; }
+.summary-body .logic { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; margin: 12px 0; }
+.summary-body .logic-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.summary-body .logic-line:last-child { margin-bottom: 0; }
+.tag { font-size: 11px; padding: 2px 9px; border-radius: 99px; font-weight: 500; }
+.tag-no { background: #fceaea; color: #791f1f; }
+.tag-yes { background: #eaf3de; color: #27500a; }
+.tag-act { background: var(--accent-light); color: var(--accent-text); }
+@media (prefers-color-scheme: dark){ .tag-no{background:#501313;color:#f7c1c1} .tag-yes{background:#173404;color:#c0dd97} }
+
+.phase-group { margin-bottom: 1.5rem; }
+.phase-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.phase-label::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+.task-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s, background 0.2s; }
+.task-card.done { background: var(--done-bg); border-color: var(--done-border); }
+.task-card.subtask { margin-right: 24px; }
+
+.task-main { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.check-btn { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; padding: 0; }
+.check-btn:hover { border-color: var(--accent); transform: scale(1.08); }
+.task-card.done .check-btn { background: var(--accent); border-color: var(--accent); }
+.check-icon { opacity: 0; transition: opacity 0.15s; }
+.task-card.done .check-icon { opacity: 1; }
+
+.task-info { flex: 1; min-width: 0; cursor: pointer; }
+.task-title { font-size: 14px; font-weight: 600; transition: color 0.2s; }
+.task-card.done .task-title { color: var(--text3); text-decoration: line-through; }
+.task-meta { display: flex; gap: 7px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+.owner-pill { font-size: 11px; padding: 2px 9px; border-radius: 99px; border: 0.5px solid; white-space: nowrap; }
+.dep-tag { font-size: 11px; color: var(--text3); display: inline-flex; align-items: center; gap: 4px; }
+.note-badge { font-size: 11px; color: var(--accent); display: inline-flex; align-items: center; gap: 3px; }
+
+.last-edit { font-size: 10.5px; color: var(--text3); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.01em; }
+.last-edit:empty { display: none; }
+.last-edit-user { color: var(--text2); font-weight: 500; }
+
+.expand-btn { background: none; border: none; cursor: pointer; padding: 5px; color: var(--text3); flex-shrink: 0; transition: transform 0.25s; display: flex; }
+.expand-btn.open { transform: rotate(180deg); }
+
+.task-body { padding: 0 16px 16px; display: none; }
+.task-body.open { display: block; }
+.divider { height: 0.5px; background: var(--border); margin-bottom: 14px; }
+.task-card.done .divider { background: var(--done-border); }
+
+.steps-title { font-size: 11px; color: var(--text3); letter-spacing: 0.05em; margin-bottom: 10px; font-weight: 600; }
+.step-row { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 8px; }
+.step-check { width: 19px; height: 19px; border-radius: 5px; border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; padding: 0; }
+.step-check:hover { border-color: var(--accent); }
+.step-check.checked { background: var(--accent); border-color: var(--accent); }
+.step-check svg { opacity: 0; }
+.step-check.checked svg { opacity: 1; }
+.step-text { font-size: 13px; color: var(--text2); line-height: 1.5; flex: 1; transition: color 0.15s; }
+.step-text.checked { color: var(--text3); text-decoration: line-through; }
+
+.note-area { margin-top: 14px; border-top: 0.5px solid var(--border); padding-top: 14px; }
+.task-card.done .note-area { border-color: var(--done-border); }
+.note-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.04em; font-weight: 600; }
+.note-input { width: 100%; background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; font-size: 13px; color: var(--text); font-family: inherit; resize: vertical; min-height: 58px; direction: rtl; outline: none; transition: border-color 0.15s; }
+.note-input:focus { border-color: var(--accent); }
+.note-input::placeholder { color: var(--text3); }
+.note-saved { font-size: 11px; color: var(--accent); margin-top: 5px; opacity: 0; transition: opacity 0.3s; }
+.note-saved.show { opacity: 1; }
+
+.footer-note { text-align: center; font-size: 11px; color: var(--text3); margin-top: 2rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top-bar">
+    <div>
+      <div class="project-name">פרויקט <span>WhatsApp</span> — לחמא</div>
+      <div class="project-sub">WATI API · ניהול משימות צוות</div>
+    </div>
+    <div class="top-actions">
+      <div class="sync-status syncing" id="sync-status" title="מצב סנכרון">
+        <span class="sync-dot"></span>
+        <span id="sync-status-text">מתחבר...</span>
+      </div>
+      <div class="user-select">
+        <label>משתמש:</label>
+        <select id="user-select" onchange="changeUser(this.value)">
+          <option value="שון">שון</option>
+          <option value="ליז">ליז</option>
+          <option value="שרון">שרון</option>
+        </select>
+      </div>
+      <button class="btn" onclick="exportStatus()">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v8m0 0L4 6m3 3l3-3M2 11v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        ייצוא סטטוס
+      </button>
+      <button class="btn" onclick="resetAll()">איפוס</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat done"><div class="stat-num" id="stat-done">0</div><div class="stat-label">בוצע</div></div>
+    <div class="stat pending"><div class="stat-num" id="stat-pending">0</div><div class="stat-label">בתהליך</div></div>
+    <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">סה"כ משימות</div></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span>התקדמות כוללת</span><span id="pct-label">0%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="summary-section">
+    <div class="summary-head" onclick="toggleSummary()">
+      <span>סיכום פגישה ורקע</span>
+      <button class="expand-btn" id="summary-expand"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="summary-body" id="summary-body">
+      <p><strong>מטרת הפרויקט:</strong> פתיחת ערוץ תקשורת רשמי עם לקוחות עסקיים דרך WATI API, לשיפור שירות הלקוחות.</p>
+      <p><strong>לוגיקת תיזכורים:</strong> הודעת תיזכורת תישלח לכל לקוח שעדיין לא ביצע הזמנה, עם לינק לפורטל לביצוע ההזמנה.</p>
+      <div class="logic">
+        <div class="logic-line"><span class="tag tag-no">לא ביצע הזמנה</span> <span style="color:var(--text3)">←</span> <span class="tag tag-act">מקבל תיזכורת + לינק לפורטל</span></div>
+        <div class="logic-line"><span class="tag tag-yes">ביצע הזמנה</span> <span style="color:var(--text3)">←</span> <span style="font-size:12px;color:var(--text3)">לא נשלחת הודעה</span></div>
+      </div>
+      <p><strong>סטטוס טכני:</strong> החיבור ל-WATI פעיל ונבדק בהצלחה.</p>
+    </div>
+  </div>
+
+  <div id="board"></div>
+
+  <div class="footer-note">
+    סנכרון ענן בזמן אמת · כל הצוות רואה את אותו הסטטוס · עדכון כל 5 שניות<br>
+    לשיתוף סטטוס — השתמשו בכפתור "ייצוא סטטוס"
+  </div>
+
+</div>
+
+<script>
+// ============== CLOUD CONFIG ==============
+// Set these after creating a jsonbin.io bin (see README.md for steps)
+const JSONBIN_BIN_ID = '';      // example: '65fa1c3e266cfc3fdb52a0e1'
+const JSONBIN_ACCESS_KEY = '';  // example: '$2a$10$....'
+const POLL_INTERVAL_MS = 5000;
+const PUT_DEBOUNCE_MS = 800;
+// ==========================================
+
+const LOCAL_FALLBACK_KEY = 'lachma_wp_v3_local';
+const USER_PREF_KEY = 'lachma_current_user';
+const cloudEnabled = !!(JSONBIN_BIN_ID && JSONBIN_ACCESS_KEY);
+
+let currentUser = localStorage.getItem(USER_PREF_KEY) || 'שון';
+
+const phases = [
+  {
+    label: 'שלב א — מקביל, ללא תלות',
+    tasks: [
+      { id: 't2', num: '2', title: 'הכנת רשימות לקוחות', owner: 'ליז',
+        ownerColor: { bg: 'var(--purple-light)', text: 'var(--purple)', border: 'rgba(83,74,183,0.4)' },
+        dep: null,
+        steps: ['הכנת רשימת פיילוט — לקוחות נבחרים','הכנת רשימה כללית עם כל הסגמנטים','בדיקת תקינות נתונים (טלפון, שם, ימי חלוקה)','העברת שני הקבצים לשון'] },
+      { id: 't3', num: '3', title: 'ניהול עלויות — חישוב חודשי', owner: 'שון + שרון',
+        ownerColor: { bg: 'var(--amber-light)', text: 'var(--amber)', border: 'rgba(186,117,23,0.4)' },
+        dep: null,
+        steps: ['ספירת לקוחות שלא מזמינים בממוצע','בדיקת תמחור הודעות ב-WATI','בניית טבלת תחזית חודשית','ניתוח ROI ואישור תקציב'] },
+    ]
+  },
+  {
+    label: 'שלב ב — ממתין לרשימת פיילוט',
+    tasks: [
+      { id: 't1', num: '1', title: 'הודעת פתיחה — אישור לקוחות', owner: 'שון',
+        ownerColor: { bg: 'var(--accent-light)', text: 'var(--accent-text)', border: 'rgba(29,158,117,0.4)' },
+        dep: 'ממתין לרשימת פיילוט (משימה 2)',
+        steps: ['כתיבת טקסט הודעת הפתיחה','הגדרת כפתורי תשובה ב-WATI (כן / לא)','הגדרת לוגיקת תגובה אוטומטית','בניית רשימת מאשרים לייצוא (הגנה משפטית)','בדיקת שליחה על רשימת פיילוט'] },
+    ]
+  },
+  {
+    label: 'שלב ג — מקביל, לאחר שלב ב',
+    tasks: [
+      { id: 't2b', num: '↳', title: 'העלאת רשימות ל-WATI', owner: 'שון', subtask: true,
+        ownerColor: { bg: 'var(--accent-light)', text: 'var(--accent-text)', border: 'rgba(29,158,117,0.4)' },
+        dep: 'ממתין לרשימות + הודעת פתיחה',
+        steps: ['קבלת קבצי לקוחות מליז','בדיקת פורמט לפני העלאה','העלאת רשימת פיילוט ל-WATI','העלאת רשימה כללית ל-WATI'] },
+      { id: 't4', num: '4', title: 'חיבור WhatsApp — אתר ופורטל', owner: 'שון',
+        ownerColor: { bg: 'var(--blue-light)', text: 'var(--blue)', border: 'rgba(24,95,165,0.4)' },
+        dep: 'ממתין לרשימות + הודעת פתיחה',
+        steps: ['מיפוי נקודות חיבור (אתר + פורטל)','הגדרת לינק לפורטל להטמעה בהודעות','פיתוח / הטמעה לפי הפלטפורמה','בדיקות חיבור מול WATI','השקה ומעקב ראשוני (2 שבועות)'] },
+    ]
+  }
+];
+
+// state shape:
+//   { tasks: { t1: { done, steps, note, lastEditedBy, lastEditedAt }, ... }, lastUpdate: number }
+let state = { tasks: {}, lastUpdate: 0 };
+let localDirty = false;
+let pendingPutTimer = null;
+
+function getTask(id) {
+  return state.tasks[id] || { done: false, steps: {}, note: '' };
+}
+
+function setSyncStatus(kind, text) {
+  const el = document.getElementById('sync-status');
+  const txt = document.getElementById('sync-status-text');
+  if (!el || !txt) return;
+  el.classList.remove('synced', 'syncing', 'offline', 'local');
+  el.classList.add(kind);
+  txt.textContent = text;
+}
+
+async function cloudGet() {
+  const res = await fetch('https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID + '/latest', {
+    headers: { 'X-Access-Key': JSONBIN_ACCESS_KEY, 'X-Bin-Meta': 'false' }
+  });
+  if (!res.ok) throw new Error('jsonbin GET ' + res.status);
+  const body = await res.json();
+  // With X-Bin-Meta:false the response is the bin content directly; otherwise it's wrapped in { record, metadata }.
+  return body && body.record !== undefined ? body.record : body;
+}
+
+async function cloudPut(data) {
+  const res = await fetch('https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID, {
+    method: 'PUT',
+    headers: {
+      'X-Access-Key': JSONBIN_ACCESS_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('jsonbin PUT ' + res.status);
+  return await res.json();
+}
+
+function loadFallback() {
+  try {
+    const raw = localStorage.getItem(LOCAL_FALLBACK_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.tasks) state = parsed;
+    }
+  } catch(e) {}
+  if (!state.tasks) state.tasks = {};
+}
+
+function saveFallback() {
+  try { localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+async function initialLoad() {
+  loadFallback();
+  if (!cloudEnabled) {
+    setSyncStatus('local', 'לוקאלי בלבד');
+    renderBoard();
+    return;
+  }
+  setSyncStatus('syncing', 'טוען...');
+  try {
+    const remote = await cloudGet();
+    if (remote && remote.tasks) {
+      state = remote;
+      saveFallback();
+    } else {
+      // fresh / empty bin — seed it with our current state
+      await cloudPut(state);
+    }
+    setSyncStatus('synced', 'מסונכרן');
+  } catch (err) {
+    console.warn('Cloud load failed, using local fallback:', err);
+    setSyncStatus('offline', 'לא מחובר');
+  }
+  renderBoard();
+}
+
+function queuePut() {
+  if (!cloudEnabled) { saveFallback(); return; }
+  localDirty = true;
+  setSyncStatus('syncing', 'שומר...');
+  if (pendingPutTimer) clearTimeout(pendingPutTimer);
+  pendingPutTimer = setTimeout(async () => {
+    try {
+      state.lastUpdate = Date.now();
+      saveFallback();
+      await cloudPut(state);
+      localDirty = false;
+      setSyncStatus('synced', 'מסונכרן');
+    } catch (err) {
+      console.warn('Cloud save failed:', err);
+      setSyncStatus('offline', 'לא מחובר');
+      // localDirty stays true so the next change retries
+    }
+  }, PUT_DEBOUNCE_MS);
+}
+
+async function pollCloud() {
+  if (!cloudEnabled) return;
+  if (document.hidden) return;
+  if (localDirty) return;
+  try {
+    const remote = await cloudGet();
+    if (remote && remote.lastUpdate && remote.lastUpdate > (state.lastUpdate || 0)) {
+      state = remote;
+      saveFallback();
+      renderBoard();
+    }
+    setSyncStatus('synced', 'מסונכרן');
+  } catch (err) {
+    setSyncStatus('offline', 'לא מחובר');
+  }
+}
+
+function changeUser(u) {
+  currentUser = u;
+  try { localStorage.setItem(USER_PREF_KEY, u); } catch(e) {}
+}
+
+function updateStats() {
+  let done = 0, total = 0;
+  phases.forEach(ph => ph.tasks.forEach(t => { total++; if (getTask(t.id).done) done++; }));
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-pending').textContent = total - done;
+  document.getElementById('stat-total').textContent = total;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('pct-label').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function markEdit(taskId) {
+  const s = getTask(taskId);
+  s.lastEditedBy = currentUser;
+  s.lastEditedAt = Date.now();
+  state.tasks[taskId] = s;
+}
+
+function toggleTask(id) {
+  const s = getTask(id); s.done = !s.done; state.tasks[id] = s;
+  markEdit(id); queuePut();
+  const el = document.getElementById('card-' + id);
+  if (el) el.classList.toggle('done', s.done);
+  updateLastEditDisplay(id);
+  updateStats();
+}
+function toggleStep(taskId, idx) {
+  const s = getTask(taskId); if (!s.steps) s.steps = {};
+  s.steps[idx] = !s.steps[idx]; state.tasks[taskId] = s;
+  markEdit(taskId); queuePut();
+  const c = document.querySelector('[data-step="'+taskId+'-'+idx+'"]');
+  const t = document.querySelector('[data-steptext="'+taskId+'-'+idx+'"]');
+  if (c) c.classList.toggle('checked', s.steps[idx]);
+  if (t) t.classList.toggle('checked', s.steps[idx]);
+  updateLastEditDisplay(taskId);
+}
+function saveNote(taskId) {
+  const s = getTask(taskId); const el = document.getElementById('note-' + taskId);
+  if (el) {
+    s.note = el.value; state.tasks[taskId] = s;
+    markEdit(taskId); queuePut();
+    const sv = document.getElementById('saved-' + taskId);
+    if (sv) { sv.classList.add('show'); setTimeout(() => sv.classList.remove('show'), 1600); }
+    const badge = document.getElementById('notebadge-' + taskId);
+    if (badge) badge.style.display = el.value.trim() ? 'inline-flex' : 'none';
+    updateLastEditDisplay(taskId);
+  }
+}
+function toggleExpand(id) {
+  const b = document.getElementById('body-' + id), e = document.getElementById('expand-' + id);
+  if (!b) return; const open = b.classList.toggle('open'); if (e) e.classList.toggle('open', open);
+}
+function toggleSummary() {
+  const b = document.getElementById('summary-body'), e = document.getElementById('summary-expand');
+  const open = b.classList.toggle('open'); e.classList.toggle('open', open);
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const sec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+  if (sec < 30) return 'עכשיו';
+  if (sec < 60) return 'לפני ' + sec + ' שניות';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return 'לפני ' + min + ' דק׳';
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return 'לפני ' + hr + ' שעות';
+  const days = Math.floor(hr / 24);
+  if (days === 1) return 'אתמול';
+  return 'לפני ' + days + ' ימים';
+}
+
+function lastEditInner(s) {
+  if (!s.lastEditedBy) return '';
+  return 'עודכן ע״י <span class="last-edit-user">' + s.lastEditedBy + '</span> · ' + timeAgo(s.lastEditedAt);
+}
+
+function updateLastEditDisplay(taskId) {
+  const el = document.getElementById('lastedit-' + taskId);
+  if (el) el.innerHTML = lastEditInner(getTask(taskId));
+}
+
+function exportStatus() {
+  let out = 'סטטוס פרויקט WhatsApp — לחמא\n';
+  out += 'משתמש: ' + currentUser + '\n';
+  out += 'תאריך: ' + new Date().toLocaleDateString('he-IL') + '\n';
+  out += '═══════════════════════\n\n';
+  phases.forEach(ph => {
+    out += '【 ' + ph.label + ' 】\n';
+    ph.tasks.forEach(t => {
+      const s = getTask(t.id);
+      out += (s.done ? '✅' : '⬜') + ' ' + t.title + ' (' + t.owner + ')';
+      if (s.lastEditedBy) out += ' — עודכן ע״י ' + s.lastEditedBy;
+      out += '\n';
+      t.steps.forEach((step, i) => { out += '   ' + (s.steps && s.steps[i] ? '✓' : '○') + ' ' + step + '\n'; });
+      if (s.note && s.note.trim()) out += '   📝 הערה: ' + s.note.trim() + '\n';
+      out += '\n';
+    });
+  });
+  navigator.clipboard.writeText(out).then(() => alert('הסטטוס הועתק ללוח! אפשר להדביק ב-WhatsApp.'))
+    .catch(() => { prompt('העתק את הסטטוס:', out); });
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  phases.forEach(ph => {
+    const phDiv = document.createElement('div');
+    phDiv.className = 'phase-group';
+    phDiv.innerHTML = '<div class="phase-label">' + ph.label + '</div>';
+    ph.tasks.forEach(task => {
+      const s = getTask(task.id);
+      const card = document.createElement('div');
+      card.className = 'task-card' + (s.done ? ' done' : '') + (task.subtask ? ' subtask' : '');
+      card.id = 'card-' + task.id;
+      const stepsHtml = task.steps.map((step, i) => {
+        const ck = s.steps && s.steps[i];
+        return '<div class="step-row">'
+          + '<button class="step-check ' + (ck?'checked':'') + '" data-step="' + task.id + '-' + i + '" onclick="toggleStep(\'' + task.id + '\',' + i + ')" aria-label="סמן שלב">'
+          + '<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+          + '<span class="step-text ' + (ck?'checked':'') + '" data-steptext="' + task.id + '-' + i + '">' + step + '</span></div>';
+      }).join('');
+      const hasNote = s.note && s.note.trim();
+      card.innerHTML =
+        '<div class="task-main">'
+        + '<button class="check-btn" onclick="toggleTask(\'' + task.id + '\')" aria-label="סמן בוצע">'
+        + '<svg class="check-icon" width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4 8L11 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+        + '<div class="task-info" onclick="toggleExpand(\'' + task.id + '\')">'
+        + '<div class="task-title">' + task.title + '</div>'
+        + '<div class="task-meta">'
+        + '<span class="owner-pill" style="background:' + task.ownerColor.bg + ';color:' + task.ownerColor.text + ';border-color:' + task.ownerColor.border + '">' + task.owner + '</span>'
+        + (task.dep ? '<span class="dep-tag"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1"/><path d="M5.5 3v2.5L7 7" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>' + task.dep + '</span>' : '')
+        + '<span class="note-badge" id="notebadge-' + task.id + '" style="display:' + (hasNote?'inline-flex':'none') + '"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v6l-2 2H2V2z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>הערה</span>'
+        + '</div>'
+        + '<div class="last-edit" id="lastedit-' + task.id + '">' + lastEditInner(s) + '</div>'
+        + '</div>'
+        + '<button class="expand-btn" id="expand-' + task.id + '" onclick="toggleExpand(\'' + task.id + '\')" aria-label="הרחב"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+        + '</div>'
+        + '<div class="task-body" id="body-' + task.id + '">'
+        + '<div class="divider"></div>'
+        + '<div class="steps-title">שלבי ביצוע</div>'
+        + stepsHtml
+        + '<div class="note-area"><div class="note-label">הערות</div>'
+        + '<textarea class="note-input" id="note-' + task.id + '" placeholder="הוסף הערה..." oninput="saveNote(\'' + task.id + '\')">' + (s.note || '') + '</textarea>'
+        + '<div class="note-saved" id="saved-' + task.id + '">נשמר ✓</div></div>'
+        + '</div>';
+      phDiv.appendChild(card);
+    });
+    board.appendChild(phDiv);
+  });
+  updateStats();
+  const sel = document.getElementById('user-select');
+  if (sel) sel.value = currentUser;
+}
+
+function resetAll() {
+  const msg = cloudEnabled
+    ? 'לאפס את כל הסימונים וההערות עבור כל הצוות? פעולה זו תמחק את הנתונים גם אצל ליז ושרון.'
+    : 'לאפס את כל הסימונים וההערות?';
+  if (!confirm(msg)) return;
+  state = { tasks: {}, lastUpdate: Date.now() };
+  saveFallback();
+  if (cloudEnabled) queuePut();
+  renderBoard();
+}
+
+initialLoad();
+setInterval(pollCloud, POLL_INTERVAL_MS);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pollCloud(); });
+
+// Refresh "time ago" labels every 30s without re-rendering
+setInterval(() => {
+  Object.keys(state.tasks || {}).forEach(taskId => updateLastEditDisplay(taskId));
+}, 30000);
+</script>
+</body>
+</html>
